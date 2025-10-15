@@ -62,12 +62,12 @@
         const bucket = this.buckets[index];
         if (!bucket) return null;
 
-        const currentNode = bucket.head;
+        let currentNode = bucket.head;
         while (currentNode !== null) {
-            if (currentNode.value) {
+            if (currentNode.value && currentNode.value.key === key) {
                 return currentNode.value.value;
             }
-            currentNode.next = currentNode;
+            currentNode = currentNode.next;
         }
 
         return null;
