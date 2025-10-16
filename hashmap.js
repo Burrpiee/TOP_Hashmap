@@ -13,10 +13,10 @@
       
         const primeNumber = 31;
         for (let i = 0; i < key.length; i++) {
-            hashCode = (primeNumber * hashCode + key.charCodeAt(i)) % this.length;
+            hashCode = (primeNumber * hashCode + key.charCodeAt(i)) % this.capacity;
         }
 
-        return hashCode;
+        return Math.abs(hashCode);
     }
 
     set(key, value) {
@@ -25,16 +25,16 @@
             throw new Error ("Only strings allowed");
         }
 
-        const index = this.hash(key); // Generate hashcode of key
+        const index = this.hash(key); // Generate hash code of key
         this.checkIndex(index); //Check if index is within bounds
 
         // Create bucket if does not exist
         if (!this.buckets[index]) {
             this.buckets[index] = new LinkedList();
-            this.buckets[index].append({key, value});
+            this.buckets[index].append([key, value]); //Key is indexed 0, value is indexed 1
             this.size++;
 
-            //Load factor check
+            this.checkLoad();
             return;
         }
 
@@ -42,15 +42,17 @@
         const bucket = this.buckets[index];
         let currentNode = bucket.head;
         while (currentNode !== null) {
-            if (currentNode.value.key === key) {
-                currentNode.value.value = value;
+            if (currentNode.value[0] === key) {
+                currentNode.value[1] = value;
                 return;
             }
             currentNode = currentNode.next;
         }
 
-        bucket.append({key,value});
+        bucket.append([key, value]);
         this.size++;
+
+        this.checkLoad();
     }
 
     get(key) {
@@ -64,8 +66,8 @@
 
         let currentNode = bucket.head;
         while (currentNode !== null) {
-            if (currentNode.value && currentNode.value.key === key) {
-                return currentNode.value.value;
+            if (currentNode.value && currentNode.value[0] === key) {
+                return currentNode.value[1];
             }
             currentNode = currentNode.next;
         }
@@ -76,7 +78,7 @@
     has(key) {
         if (typeof key !== 'string') return false;
 
-        const index = this.hash(index);
+        const index = this.hash(key);
         this.checkIndex(index);
 
         const bucket = this.buckets[index];
@@ -84,7 +86,7 @@
 
         let currentNode = bucket.head;
         while(currentNode !== null) {
-            if (currentNode.value.key === key) return true;
+            if (currentNode.value[0] === key) return true;
             currentNode = currentNode.next;
         }
 
@@ -103,12 +105,12 @@
         let currentNode = bucket.head;
         let linkedListIndex = 0;
         while (currentNode !== null) {
-            if (currentNode.value.key === key) {
+            if (currentNode.value[0]=== key) {
                 bucket.removeAt(linkedListIndex);
                 this.size--;
 
                 // Clean up bucket
-                if (bucket.head = null) {
+                if (bucket.head === null) {
                     this.buckets[index] = null;
                 }
 
@@ -126,15 +128,67 @@
     }
 
     clear() {
-        this.buckets = Array(this.capacity);
+        this.buckets = Array(this.capacity).fill(null);
         this.size = 0;
     }
 
+    keys() {
+        const array = [];
 
+        for (const bucket of this.buckets) {
+            if (!bucket) continue;
+
+            if (bucket instanceof LinkedList) {
+                let currentNode = bucket.head;
+                while (currentNode) {
+                    array.push(currentNode.value[0]);
+                    currentNode = currentNode.next;
+                }
+            }
+        }
+
+        return array;
+    }
+
+    values() {
+        const array = [];
+
+        for (const bucket of this.buckets) {
+            if (!bucket) continue;
+
+            if(bucket instanceof LinkedList) {
+                let currentNode = bucket.head;
+                while (currentNode) {
+                    array.push(currentNode.value[1]);
+                    currentNode = currentNode.next;
+                }
+            }
+        }
+
+        return array;
+    }
+
+    entries() {
+        const array = [];
+
+        for (const bucket of this.buckets) {
+            if (!bucket) continue;
+
+            if (bucket instanceof LinkedList) {
+                let currentNode = bucket.head;
+                while (currentNode) {
+                    array.push(currentNode.value);
+                    currentNode = currentNode.next;
+                }
+            }
+        }
+
+        return array;
+    }
 
     // Check whether index is valid as part of project spec
     checkIndex(index) {
-        if (index < 0 || index >= buckets.length) {
+        if (index < 0 || index >= this.buckets.length) {
             throw new Error("Trying to access index out of bounds");
         }
     }
@@ -142,8 +196,15 @@
     // Check if hashmap needs to be expanded
     checkLoad() {
         if (this.capacity * this.loadFactor < this.size) {
-            // Use entries to iterate
+            let oldEntries = this.entries();
 
+            this.capacity *= 2;
+            this.buckets = Array(this.capacity).fill(null);
+            this.size = 0;  
+
+            for (const [key, value] of oldEntries) {
+                this.set(key, value);
+            }
         }
     }
 }
