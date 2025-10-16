@@ -2,9 +2,9 @@
  
  export default class HashMap {
     constructor(loadFactor = 0.75, capacity = 16) {
-        this.loadFactor = capacity;
-        this.capacity = loadFactor;
-        this.buckets = new Array(capacity);
+        this.loadFactor = loadFactor;
+        this.capacity = capacity;
+        this.buckets = Array(capacity).fill(null);
         this.size = 0;
     }
 
@@ -120,6 +120,17 @@
 
         return false;
     }
+
+    length() {
+        return this.size;
+    }
+
+    clear() {
+        this.buckets = Array(this.capacity);
+        this.size = 0;
+    }
+
+
 
     // Check whether index is valid as part of project spec
     checkIndex(index) {
