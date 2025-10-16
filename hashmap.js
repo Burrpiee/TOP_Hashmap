@@ -1,4 +1,4 @@
- import LinkedList from "./linkedList";
+ import LinkedList from "./linkedList.js";
  
  export default class HashMap {
     constructor(loadFactor = 0.75, capacity = 16) {
