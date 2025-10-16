@@ -201,13 +201,6 @@ export default class LinkedList {
             if (!this.head){
                 this.tail = null;
             }
-            // Mistake made redundant code
-            // if (this.size === 1) {
-            //     this.head = null;
-            //     this.tail = null;
-            //     this.size = 0;
-            // }
-
             this.size--;
             return;
         }

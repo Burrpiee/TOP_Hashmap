@@ -73,6 +73,54 @@
         return null;
     }
 
+    has(key) {
+        if (typeof key !== 'string') return false;
+
+        const index = this.hash(index);
+        this.checkIndex(index);
+
+        const bucket = this.buckets[index];
+        if (!bucket) return false;
+
+        let currentNode = bucket.head;
+        while(currentNode !== null) {
+            if (currentNode.value.key === key) return true;
+            currentNode = currentNode.next;
+        }
+
+        return false;
+    }
+
+    remove(key) {
+        if (typeof key !== 'string') return false;
+
+        const index = this.hash(key);
+        this.checkIndex(index);
+
+        const bucket = this.buckets[index];
+        if (!bucket) return false;
+
+        let currentNode = bucket.head;
+        let linkedListIndex = 0;
+        while (currentNode !== null) {
+            if (currentNode.value.key === key) {
+                bucket.removeAt(linkedListIndex);
+                this.size--;
+
+                // Clean up bucket
+                if (bucket.head = null) {
+                    this.buckets[index] = null;
+                }
+
+                return true;
+            }
+            currentNode = currentNode.next;
+            linkedListIndex++;
+        }
+
+        return false;
+    }
+
     // Check whether index is valid as part of project spec
     checkIndex(index) {
         if (index < 0 || index >= buckets.length) {
